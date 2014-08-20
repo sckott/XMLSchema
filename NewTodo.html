@@ -1,0 +1,836 @@
+<html xmlns:r="http://www.r-project.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Todo List: </title>
+<link rel="stylesheet" href="file:///Users/duncan/Classes/StatComputing/XDynDocs/inst/CSS/OmegaTech.css">
+<link rel="stylesheet" href="file:///Users/duncan/Classes/StatComputing/XDynDocs/inst/CSS/Todo.css">
+<script language="JavaScript" src="file:///Users/duncan/Classes/StatComputing/XDynDocs/inst/JavaScript/tooltips.js"></script>
+</head>
+<body>
+<center><table><tr valign="top">
+<th align="left" style="padding-right: 130pt"><ol>
+<li>
+<a href="#General">General</a>
+       - 49 <i class="notDone">(30)</i>
+</li>
+<li><a href="#Done">Done</a></li>
+</ol></th>
+<th align="right">
+   Total number of elements: 51<br>
+   Not yet completed: 32<br>
+   High priority: 13<br>
+   Completed: 19</th>
+</tr></table></center>
+<hr width="50%" height="2">
+<div><hr width="50%"></div>
+<h2 class="topic"><a name=""></a></h2>
+<ol><dl>
+<hr width="50%" height="2">
+<div class="done"></div>
+</dl></ol>
+<h2 class="topic"><a name="General">General</a></h2>
+<div class="topic-table">
+<p align="center"><a href="#"></a></p>
+<table width="200"><tbody>
+<tr>
+<th><i>Status</i></th>
+<th><i>Count</i></th>
+</tr>
+<tr>
+<td align="left" class="done"><a class="done" href="#::done">done</a></td>
+<td align="center" class="done">19</td>
+</tr>
+<tr>
+<td align="left" class="check"><a class="check" href="#::check">check</a></td>
+<td align="center" class="check">10</td>
+</tr>
+<tr>
+<td align="left" class="high"><a class="high" href="#::high">high</a></td>
+<td align="center" class="high">3</td>
+</tr>
+<tr>
+<td align="left" class="low"><a class="low" href="#::low">low</a></td>
+<td align="center" class="low">3</td>
+</tr>
+<tr>
+<td align="left" class="future"><a class="future" href="#::future">future</a></td>
+<td align="center" class="future">1</td>
+</tr>
+<tr>
+<td align="left" class="fix"><a class="fix" href="#::fix">fix</a></td>
+<td align="center" class="fix">1</td>
+</tr>
+<tr>
+<td align="left" class="document"><a class="document" href="#::document">document</a></td>
+<td align="center" class="document">1</td>
+</tr>
+<tr>
+<td align="left" class="medium"><a class="medium" href="#::medium">medium</a></td>
+<td align="center" class="medium">1</td>
+</tr>
+<tr>
+<td align="left" class="later"><a class="later" href="#::later">later</a></td>
+<td align="center" class="later">2</td>
+</tr>
+<tr>
+<td align="left" class="no-status"><a class="no-status" href="#">no status</a></td>
+<td align="center">8</td>
+</tr>
+<tr>
+<th></th>
+<th><hr width="50%"></th>
+</tr>
+<tr>
+<th></th>
+<td align="center">     (49)</td>
+</tr>
+</tbody></table>
+</div>
+<ol><dl>
+<div class="todoItem">
+<dt class="high"><li class="high" title="high">
+<a name="::high"></a>
+defineClasses() fails for ogckml22.xsd.
+Fails for AbstractObjectType.
+
+  No definition was found for superclass “ListOfanySimpleType” in the specification of class “AbstractObjectType”
+
+This is the type of the first "slot", but it has no name. We could use this as
+the base class, or define a slot for it.
+This has two attribute slots as well. 
+
+</li></dt>
+<dd class="high"></dd>
+</div>
+<div class="todoItem">
+<dt class="high"><li class="high" title="high">
+<a name="::high"></a>
+defineClasses(pmml) fails because ListOfANY is not found.
+Part of "TableLocatorOrInlineTable", then Extension.row, then "row".
+The last of these has a repn with ListOfANY. 
+Need to have the class check the validity of the length, i.e. minOccurs=2.
+<br>
+Do we really need ListOfANY. Can't we just extend list.
+<br>
+Add validity for length.
+</li></dt>
+<dd class="high"></dd>
+</div>
+<div class="todoItem">
+<dt class="high"><li class="high" title="high">
+<a name="::high"></a><a name="eGQueryResultType"></a>
+In processing egquery.xsd, eGQueryResultType doesn't recognize
+the maxOccurs for the slot named ResultItem (with @type ResultItemType) and so just has one rather than a list
+of them.
+<br>
+<pre class="rcode">
+library(XMLSchema); sch = readSchema("inst/samples/egquery.xsd")
+defineClasses(sch, force = TRUE)
+doc = xmlParse("~/Books/XMLTechnologies/XMLSchema/egqueryResult.xml")
+as(xmlRoot(doc)[[2]], "eGQueryResultType")
+</pre>
+<br>
+Getting closer, but a) need validity on ResultItem class, 
+b) give it a better name to suggest a list,
+c) make conversion suck up the items, not just the first one.
+<br>
+Now we have the LocalElement object and the count. So we need to turn this into a 
+SimpleSequenceType or a RestrictedListType and force the definition.
+createClassRepresentation also needs to know about this.
+<br>
+In the call to defClass, we end up with
+<pre class="rcode">
+i@name
+class(i@slotTypes[[2]])   # ClassDefinition
+class(sch[[1]]$eGQueryResultType@slotTypes[[2]]) # LocalElement
+i@slotTypes[[2]]@count   # numeric(0)
+</pre>
+So we have gone from a LocalElement with a count &gt; 1 to just an instance.
+<br>
+Resolving the local element directly
+<pre class="rcode">
+r = XMLSchema:::resolve(sch[[1]]$eGQueryResultType@slotTypes[[2]], sch)
+</pre>
+results in a LocalElement. The count on its @type is numeric(0).
+But
+<pre class="rcode">
+tt = XMLSchema:::resolve(sch[[1]]$eGQueryResultType, sch)
+class(tt@slotTypes[[2]])
+</pre>
+loses the LocalElement and just returns the ClassDefinition for ResultItemType.
+So let's look at where in the recursive <code class="rfunc">resolve()</code> this happens.
+<br>
+<b>The problem is that we were stripping the LocalElement in the call to 
+<code class="rfunc">findSelfRefs()</code> and so <code class="rfunc">resolve()</code> was never seeing that 
+<code class="rclass">LocalElement</code>.
+This happens when calling <code class="rfunc">findSelfRefs()</code> on the eGQueryResultType
+object (not the LocalElement object).</b>
+<br>
+This class is being defined by forcing the dependencies when defining Result.
+And in the Result description in defineClassDefinition,  we have
+class(i@slotTypes[[2]]@type@slotTypes[[2]]) returning a ClassDefinition
+and not a LocalElement.  So somehow - perhaps during resolve() - we have lost that information.
+How should we handle it - return the LocalElement, or make the ClassDefinition into a RestrictedListType or
+  include the count and have that be used when defining the actual class.
+<br>
+After we readSchema(), we have the correct information. So it is when we define the class.
+The call to createClassRepresentation() returns "ResultItemType" for the second slot
+rather than a list of these.  We should define a new RestrictedListType or something
+that induces a new class which is a List-Of-ResultItemType objects.
+This calls mapSchemaTypeToS().
+If this creates a new class description, we have to ensure that is defined.
+So we should do this earlier in the process, i.e. recognize the count
+and turn the slotType into RestrictedListType in the ClassDefinition.
+So this would be done in <code class="rfunc">processSchemaType()</code>.
+The problem is that we have a local element there.
+So it is legitimate to leave that as is, unaggressively  describing the element.
+<pre class="rcode">
+source("query.R")
+e = query[[1]]$eGQueryResult@slotTypes[[2]]
+class(e)
+e@count
+</pre>
+The count is also on the type, but that is a SchemaTypeReference.
+This is getting lost when we resolve the reference.
+<br>
+This is probably okay and then we recognize that we have a type
+and a number of elements. So we could create an intermediate class,
+or use a generic list with a filter on the types. This still
+needs an intermediate class that extends the generic list type.
+<br>
+We could make eGQueryResultType an extension of  list with an ERROR slot.
+Alternatively, make it a new class with 2 slots - ResultItem and ERROR, 
+and ResultItem would be a qualified list class.
+<br>
+Is this similar to Authors in biblio.xsd, i.e.
+making a class that is a list containing elements of a data type.
+</li></dt>
+<dd class="high"></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+defineClasses(pmml) now goes into infinite recursion.
+Maybe it got further than before?
+<br>
+There is a circular reference for Node. It is an element
+that contains a complex type and one of its elements has a reference to Node.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+For ogckml22.xsd, we have infinite recursion for AbstractFeatureType.
+If we comment out the  element referencing xal:AddressDetails, then we avoid the infinite recursion.
+Note that AddressDetails in xAL.xsd is both an element and a type.
+Resolving this with
+<pre class="rcode">
+resolve(sch[[1]]$AbstractFeatureType@slotTypes$AddressDetails@type, sch, recursive = FALSE, type = XMLSchema:::notElementFun)
+</pre>
+shows that we have an NA in the name "PostalServiceElements.NA.any"
+<pre class="rcode">
+i = which(names(sch[[3]]) == "AddressDetails")
+sch[[3]][[4]] # the class, not the element
+</pre>
+The following causes the infinite recursion:
+<pre class="rcode">
+trace(resolve, quote({print(c(class(obj))); browser()}))
+resolve(sch[[1]]$AbstractFeatureType@slotTypes$AddressDetails@type, sch, recursive = TRUE)
+</pre>
+It is the first slot that causes the problems
+<pre class="rcode">
+a = resolve(sch[[3]][[4]]@slotTypes[[1]], sch)
+</pre>
+<pre class="rcode">
+it = sch[[3]][[4]]@slotTypes[[1]]
+</pre>
+This is a ClassDefinition - "PostalServiceElements.NA.any"
+<b>Done We should fix the name! See #UnionDefinition. </b>
+Fails on the 2nd slot - resolve(it@slotTypes[[2]],  sch)
+but the first an third slot are fine.
+<pre class="rcode">
+it = sch[[3]][[4]]@slotTypes[[1]]
+it = it@slotTypes[[2]]
+</pre>
+This is a UnionDefinition.
+We can resolve the slots 1, 2
+Fails on 3, 4, 5, 6 - Country, AdministrativeArea, Locality, Thoroughfare.
+<pre class="rcode">
+sapply(it@slotTypes, class)
+<pre class="routput">
+           Address       AddressLines            Country 
+         "Element"     "LocalElement"          "Element" 
+AdministrativeArea           Locality       Thoroughfare 
+         "Element"          "Element"          "Element" 
+</pre>
+</pre>
+There are actually cross references. Are there? 
+
+xx = XMLSchema:::findSelfRefs(it@slotTypes[[3]])
+Reinstate this in resolve() generic, but make certain that we fix this
+so that it returns an element and not the SchemaTypeReference that it refers
+to. What example was this failing on before?
+
+<br>
+
+<br>
+Note that this has a "" in the first name of the slotTypes.
+The rest are all "attribute", except the last is a "Code".
+[Fixed] These should have proper names. 
+Note that we are missing the attributes from the grPostal  group.
+Also, where is the "Code" attribute coming from? That is the grPostal.
+Why is it at the end of this collection of attributes?
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+Look into why we needed the call to <code class="rfunc">findSelfRefs()</code> in resolve.
+What does it do?  
+<br>
+Do we just need to make that smarter so that it doesn't kill the wrong thing,
+e.g. egQueryResultType's ResultItem LocalElement slot.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+<b>Check</b>
+Add method for as(node, "list") and implement it as
+xmlSApply(node, fromXML).
+Implement this for <code class="rfunc">fromXML()</code> also.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+<b>Is this working now?</b>
+createSOAPConverter() failing for SimpleSequenceType in pmml
+because no name for slot (and NA for type).  Class "row" again!
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+<b>Check how the attribute is mapped to R</b>
+<br>
+defineClass(pmmlSchema) fails.
+Now infinite recursion.
+<br>
+Ending up with a call o getClassDef() with "" as the name of the class.
+This happens as part of processing the ChildParent type.
+As we descend down, we get to InlineTable and try to define this.
+This has slots Extension and row. At this point, Rname and name on the
+i@slotTypes$row@Rname are correct, i.e. "row".
+But the names of the slots in names(i@slotTypes$row@slotTypes) is just "".
+And that is true of the original object in our schema returned by <code class="rfunc">readSchema()</code>, i.e
+names(sch[[1]]$row@type@slotTypes).  So that is where our problem may lie.
+Similarly, sch[[1]]$row@type@slotTypes[[1]]@Rname gives character(0)
+and 
+sch[[1]]$row@type@slotTypes[[1]]@name gives NA.
+<b>Fix up the hacks in processSchemaElement with note "XXX Forcing"</b>
+<br>
+With this force-fixes, we now get infinite recursion when defining MiningModel.
+<br>
+One of the problems with this name the type the same as the element is that
+when we attempt to resolve the type by the name, we (may) get the element
+<br>
+
+When we get down into <code class="rclass">defnClass</code> for "row"
+<br>
+In the call to defineClassDefinition for this, we get
+<pre class="rcode">
+sapply(i@slotTypes, class)
+<pre class="routput">
+                   Extension    TableLocatorOrInlineTable 
+                   "Element"            "UnionDefinition" 
+                  childField                  parentField 
+          "SchemaStringType"           "SchemaStringType" 
+            parentLevelField                  isRecursive 
+          "SchemaStringType" "RestrictedStringDefinition" 
+</pre>
+</pre>
+We are dying in the 6th of these which is the isRecursive.
+The problem is that there is no type attribute.
+The type is given as a child of the attribute.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+Implement method for createSOAPConverter for SimpleSequenceType.
+ UnionDefinition (is this already done generically). 
+SchemaGroupType, SchemaComplexType.
+<br>
+Do we want to do Element and SimplElement?
+<br>
+For SimpleSequenceType, move the code from createArrayClass to <code class="rfunc">createSOAPConverter()</code>
+but we need to compute the base type and the type of the elements.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class=""><li class="" title="">
+<a name="::"></a>
+How to get fromXML(node) to recognize that there is a mapping
+from the element name to a class when the element name does not
+correspond to an actual class?
+<br>
+Do we define a class for the element?
+<br>
+Problem is multiple elements may map to the same name.
+But not at the top-level.  Can we use composite names to identify the class
+for internal/local elements.
+<br>
+Another approach is store the information about
+elements to actual classes in a variable that we can identify
+from the root of the document. We know the 
+names of the possible root types, so we can create a
+variable for each of these. To avoid conflicts, we
+could use the namespace URI in the name.
+This would be even easier if we could put the schema classes
+into  a separate environment, e.g. package.
+For example,  in kml21
+BalloonStyle corresponds to BalloonStyleType,
+and GroundOverlay corresponds to GroundOverlayType.
+
+<br>
+So let's find the Element and SimpleElements in the schema
+and get the names of their R types. 
+<pre class="rcode">
+library(XMLSchema); sch = readSchema("~/GitWorkingArea/XMLSchema/inst/samples/kml21.xsd")
+e = sapply(sch[[1]], function(x) is(x, "Element") || is(x, "SimpleElement"))
+elementMap = sapply(sch[[1]][e], function(x) x@type@Rname)
+</pre>
+To see the comparison between the names
+<pre class="rcode">
+cbind(names(sapply(sch[[1]][e], function(x) x@type@Rname)), as.character(sapply(sch[[1]][e], function(x) x@type@Rname)))
+</pre>
+elementMap is the variable we want. We can use the name of the 
+node to 
+We need to ensure these types are resolved first and then
+compute the Rname to be certain we have the correct name.
+
+<br>
+We have defined a method for <code class="rfunc">fromXML()</code> to be given
+or to find this map based on  the URI or being explicitly passed
+it by value (or by name).
+<b>We need to ensure that this is used recursively.</b>
+<br>
+We could just append Type to get the class, but this is just a convention
+and from the comparison above it doesn't work, styleUrl - URI, kml - KmlType
+<br>
+Another approach is to define a 
+class for each element that extends the associated type.
+Then we define a coerce method for an XMLAbstractNode
+<pre class="rcode">
+setClass("GroundOverlay", contains = "GroundOverlayType")
+setAs("XMLAbstractNode", "GroundOverlay", function(from) as(from, "GroundOverlayType"))
+</pre>
+<b>Get rid of warning about prototype in setClass call</b>
+Then as(ov[[1]], "GroundOverlay") should do its job.
+</li></dt>
+<dd class=""></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+By changing optionalDefaultValue(), we now break defClass for NetworkLinkType.
+<br>
+Added coerceValue call to handle logicals.
+<br>
+Prototypes for NetworkLinkType break the setClass.
+This works
+      def = setClass(name, representation = repn, where = where, contains = baseClass, prototype = prototype(list(), refreshVisibility = FALSE, flyToView = FALSE))
+but computing the protoype with (version in b9047f8 of genCode.R) does not. 
+How can we tell when we need to add this.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Converter for kml21 and GroundOverlayType doesn't get the default value correct.
+e.g. altitudeMode.  The default doesn't seem to be set for either the LocalElement or the RestrictedStringDefinition.
+<pre class="rcode">
+kml = readSchema("inst/samples/kml21.xsd")
+defineClasses(kml)
+</pre>
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Need to have XMLSchema package in search path for weather due to need for asIntegerSetValue.
+Shall we explicitly reference it via XMLSchema::asIntegerSetValue in the code we generate
+or leave the environment of the function be the XMLSchema.
+<br>
+What schema generates this?
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Infinite recursion when resolving a type with same name as an element.
+Can find the element first.  e.g. items in shirts.xsd
+<pre class="rcode">
+library(XMLSchema); sh = readSchema("inst/samples/shirts.xsd")
+XMLSchema:::defClass(sh[[1]]$items, types = sh)
+</pre>
+<br>
+Added a type argument which can be a function and is used as
+a predicate to find which elements in a schema we want to consider.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+readSchema fails for ogckml22.xsd
+<br>
+Also, Failed to handle AddressIdentifier - complexType &amp; attribute, mixed = "true". Problem is anyAttribute element, probably.
+But the error is in processSchemaElement and setNameIf for AddressIdentifier.
+<br>
+[Fixed] Several warnings about skipping children attribute definition.
+These were just annotation nodes, so don't issue the warning in these circumstances.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="low"><li class="low" title="low">
+<a name="::low"></a>
+Generalize how we compute the as.string/as.character name in SOAPTypes.S#56 and genCode.R#733
+</li></dt>
+<dd class="low"></dd>
+</div>
+<div class="todoItem">
+<dt class="future"><li class="future" title="future">
+<a name="::future"></a>
+It would be good to use an enviroment for SchemaCollection and SchemaTypes
+so that we can change and add items as we process things.
+We could insert the resolved definitions and avoid doing it over again.
+We can add new items when we define intermediate classes such as local
+data types within elements.
+</li></dt>
+<dd class="future"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+<b>The following doesn't appear to happen anymore now. See check.R</b>
+<br>
+How do we end up wth SchemaComplexType at the top-level of the schema?
+We only see them in the XMCDA schema in all our sample schema (see check.R).
+It looks like these should turn into ClassDefinition.
+For example, the "parameters" type is a sequence and an attribute group.
+<br>
+<b>So implement this case in processSchemaType</b>
+<br>
+Map the SchemaComplexType in XMCDA to ClassDefinition types.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="fix"><li class="fix" title="fix">
+<a name="::fix"></a>
+Make the Element classes extend the corresponding type in makeElementClassDef
+and not XMLSchemaFakeClass.  Issue with prototypes being  S4 and list and not reconcilable.  
+</li></dt>
+<dd class="fix"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+<i>Check SSOAP to see if this has broken anything.</i>
+
+The default value for the ERROR slot in eGQueryResultType should be character(0), not "".
+<br>
+The defaultValues in defineClassDefinition() are correct.
+Fix makePrototype().
+A simple call to prototype(defaults) gets the right thing. What
+does it screw up elsewhere.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Related to createSOAPConverter(), make certain to deal with mixed
+and simple content when we have to pick up the text content from the node.
+e.g. SnippetType in kml21
+<br>
+See kml.R.  Works for string or character as base class.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Create the fromConverter for ClassDefinition and ExtendedClassDefinition.
+<br>
+Use createSOAPConverter if possible.
+<br>
+Make fromXML handle optional slots, required slots, 
+attributes, attribute default values, etc.
+<br>
+LatLonBoxType in kml2.1.xsd
+Use this as an example of converting an ExtendedClassDefinition into
+an R class and a fromConverter.
+These elements are optional. So we have to check if they are present.
+<br>
+See LatLonBoxType.Rdb in Books/XMLTechnologies/XMLSchema.
+<br>
+<b>Works for these</b>
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="document"><li class="document" title="document">
+<a name="::document"></a>
+Document CodeGenOpts and provide a constructor function.
+</li></dt>
+<dd class="document"></dd>
+</div>
+<div class="todoItem">
+<dt class="low"><li class="low" title="low">
+<a name="::low"></a>
+Pretty print the description objects.
+Define <code class="rfunc">show()</code> methods.
+</li></dt>
+<dd class="low"></dd>
+</div>
+<div class="todoItem">
+<dt class="medium"><li class="medium" title="medium">
+<a name="::medium"></a>
+Should we check the validity for length =  0 in
+a SimpleSequenceType if the minOccurs is 1.
+</li></dt>
+<dd class="medium"></dd>
+</div>
+<div class="todoItem">
+<dt class="low"><li class="low" title="low">
+<a name="::low"></a>
+Graphical display of class hierarchy.
+</li></dt>
+<dd class="low"></dd>
+</div>
+<div class="todoItem">
+<dt class="check"><li class="check" title="check">
+<a name="::check"></a>
+Default value for Extension.row in pmml is wrong - character(). Should be NULL.
+<br>
+We now kill these off too, I believe.
+</li></dt>
+<dd class="check"></dd>
+</div>
+<div class="todoItem">
+<dt class="later"><li class="later" title="later">
+<a name="::later"></a><a name="string"></a>
+Define a "string" class that extends/contains "character".
+Problem is that we lose the class of the elements
+as they become "character".
+</li></dt>
+<dd class="later"></dd>
+</div>
+<div class="todoItem">
+<dt class="later"><li class="later" title="later">
+<a name="::later"></a>
+Have to use a list as the base class for RestrictedListType 
+(and SimpleSequenceType) when the element type is a sub-class
+of a primitive type, e.g. "string" or "character".  See 
+</li></dt>
+<dd class="later"></dd>
+</div>
+<hr width="50%" height="2">
+<div class="done">
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+Define method for converting to URI
+Test is styleUrl in kml21
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+<b> Need to put in the element accessor in the code</b>
+Converter creation for KML 2.1 is  broken. 
+Not getting the elements within the top node.
+Need to decide who is doing what at what level.
+<br>
+If we have an Element, we don't have the count to determine if it is optional.
+<br>
+We are getting a SchemaTypeReference in genSlotFromConverterCode.
+When processing the ClassDefinition StyleMapPairType.
+<br>
+[Fixed - for now] Counts are getting messed up, e.g. GroundOverlay has no count info for altitudeMode,
+or any of its slots.
+They are in the slot types however.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+sch = readSchema("inst/samples/pmml-4-1.xsd")
+doesn't even work now. Fails in TimeValue.
+processSchematype line 505.
+Trying to put an Element into the content slot of a SchemaComplexType.
+Did the class of def change, or did we use to not return an Element
+from processSequence. If processSchemaType returned a SimpleSequenceType
+for the sequence  we are processing, all would be well.
+We could also open the content  slot to be an Element.
+In the older versions, the SchemaComplexType was a ClassDefinition.
+The slotTypes[[1]] object was the Element.
+In the old version, we use the condition xmlName(type) == "element" in processSchemaType  (now line 462).
+Same condition in new version.
+<br>
+Is this because we put the name attribute on the node!  We do seem to do this in the new version.
+Seems to work with that commented out (line 1014).
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+The weather.R example for SOAP fails now. The call to LatLonListCityNames fails to put the
+value of the argument (2) into the displayLevel node.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+NA for slot name in ClassDefinition when the slot is a UnionDefinition.
+Is it all from processSequence?
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+UnionDefinition doesn't seem to get the dependent classes defined.
+<br>
+For SchemaVoidType, define a class that extends
+<pre class="rcode">
+library(XMLSchema); sh = readSchema("inst/samples/shirts.xsd")
+defineClasses(sh, verbose = TRUE)
+nn = newXMLNode("shirt")
+as(nn, "shirt")
+</pre>
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+readSchema fails for ogckml22.xsd
+<br>
+Introduced an AttributeGroup class.  We need to be able to store this if it is defined
+in one schema and referenced in another. For example, grPostal is defined in xAL.xsd
+and referenced in ogckml22.xsd.  (We could replace the import/include directive with the contents.)
+<br>
+Works now. (17:43). Now try defineClasses()
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+source("check.R") broken again.
+ogckml22.xsd causing problems.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+MODIS example for SSOAP not putting product name in the body of the request
+for def@functions$getbands("MCD12Q1").
+See modis.R
+<br>
+We leave it to standardGeneric() to add the content to the node if literal is FALSE.
+But our generic had ans = standardGeneric() and surrounding code.
+But the change in R meant that this was defaulting to a simple generic with no surrounding
+code. So the values were never being inserted into the xml.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+SSOAP fails for kegg.R
+<pre class="rcode">
+debug(SSOAP:::writeTypes)
+o = kegg.iface@functions$get_pathways_by_genes("eco:b0078")
+</pre>
+The types is 
+
+          xsi:type SOAP-ENC:arrayType 
+  "SOAP-ENC:Array"            "NA[1]" 
+
+This should be string[1], not NA[1], of course.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+Use createSOAPConverter to create the fromConverter when we are defining the classes.
+<br>
+SnippetType is getting the wrong converter, yet createSOAPConverter for the type is correct.
+See kml.R.
+In defClass(), the type@slotTypes[[1]] is a PrimitiveSchemaType, not an AttributeDef.
+This is because it is coming in indirectly from a field in FeatureType.
+When we resolve that, we get a different definition of 
+<br>
+Temporarily changed getName() and also had resolve() method for AttributeDef
+return the AttributeDef but with the type resolved.
+We may need to back these out, but defineClasses() seems to complete.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+In <code class="rfunc">genSlotFromConverterCode()</code>, we are getting the name of the element not the type
+for <code class="rclass">LocalElement</code>.  See <code class="rfunc">getRTypeFromSOAP()</code>
+<br>
+Extended <code class="rfunc">getRTypeFromSOAP()</code> to look at its first argument
+and to process a GenericSchemaType and a LocalElement to get the name, then map it.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+When creating the prototype for a class definition,
+make certain we use the default value for an attribute.
+<br>
+See SnippetType and vec2Type in kml21.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+define classes correponding to Element objects
+<br>
+Make this optional.
+<br>
+See defineElementClasses parameter in <code class="rfunc">defineClasses()</code>
+and the function named <code class="rfunc">defineElementClasses()</code>.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+Defining ObjectType in kml21.xsd doesn't use classes ID and NCName.
+The PrimitiveSchemaType in sch[[1]]$ObjectType@slotTypes[[1]]@type
+has a value for Rname that is "character" and not ID
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+Create the enumerated constants for RestrictedStringDefinition.
+Make this optionally.
+This would create a variable with the same name as the actual value
+and be there solely to avoid typos.
+<br>
+Document the defineVarEnums.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+remove the kml.xml file in inst/samples/
+<br>
+in notes/
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+SimpleSequenceType: biblio.xsd and Authors
+<br>
+What about this? On my  hand-written notes.
+<br>
+We need to create a validity method, converter, 
+and also force the definitions of dependent classes.
+
+<br>
+We should be able to move this to <code class="rfunc">createSOAPConverter()</code>
+but we need to compute the base type and the type of the elements.
+</li></dt></div>
+<div class="todoItem"><dt class="done"><li class="done" title="done">
+<a name="::done"></a>
+What is the difference between SchemaAnyType (fewer occurrences) and AnySchemaType.
+<br>
+I have removed the former now. Test!!!!!
+</li></dt></div>
+</div>
+</dl></ol>
+</body>
+</html>
